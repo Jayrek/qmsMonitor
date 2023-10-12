@@ -50,11 +50,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     periodicTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
       final response = await QmsService.getQueue();
       setState(() => _queueModel = response);
-      if (previousCall < int.parse(_queueModel!.newCall.toString())) {
-        setState(
-          () => previousCall = int.parse(_queueModel!.newCall.toString()),
-        );
-        _playLocalFile();
+      if (_queueModel!.newCall != null) {
+        if (previousCall < int.parse(_queueModel!.newCall.toString())) {
+          setState(
+            () => previousCall = int.parse(_queueModel!.newCall.toString()),
+          );
+          _playLocalFile();
+        }
       }
     });
   }
@@ -86,9 +88,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Row(
         children: [
           Flexible(
+            flex: 2,
             child: _buildNowServingWidget(_queueModel?.nowServing),
           ),
           Flexible(
+            flex: 1,
             child: _buildUpNextWidget(_queueModel?.upNext),
           ),
         ],
@@ -99,6 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildNowServingWidget(List<NowServing>? nowServingList) {
     return Container(
       color: Colors.white,
+      width: double.infinity,
       margin: const EdgeInsets.only(left: 20, right: 10, top: 10, bottom: 10),
       padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
       child: Column(
@@ -116,19 +121,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'NAME',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               Text(
                 'WINDOW',
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.blue.shade800,
                   fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'TRANSACTION',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.blue.shade800,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Text(
+                  'QUEUE NO.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.blue.shade800,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -146,27 +163,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       itemBuilder: (context, index) {
                         final nowServing = nowServingList[index];
 
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            nowServing.visitor.toString(),
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          dense: true,
-                          trailing: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 25),
-                            child: Text(
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
                               nowServing.window.toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 35,
-                                color: Colors.blue.shade800,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Text(
+                                nowServing.trans.toString().toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Text(
+                                nowServing.visitor.toString().toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 35,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       }),
                 )
